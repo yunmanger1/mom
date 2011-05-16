@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	
+    <display-name>
+      Mom WEB Client
+    </display-name>
+    <description>
+      Dummy Application
+    </description>
+
+    <!-- context-param>
+      <param-name>name_of_context_initialization_parameter</param-name>
+      <param-value>value_of_context_initializtion_parameter</param-value>
+      <description> Again, some description </description>
+    </context-param-->
+    
+    <servlet>
+      <servlet-name>SimpleServlet</servlet-name>
+      <servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.SimpleServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>SimpleServlet</servlet-name>
+      <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+
+    <session-config>
+      <session-timeout>30</session-timeout> 
+    </session-config>
+
+</web-app>
