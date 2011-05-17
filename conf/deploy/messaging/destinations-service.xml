@@ -13,7 +13,7 @@
    -->
    
    <!--mbean code="org.jboss.jms.server.destination.QueueService"
-      name="jboss.messaging.destination:service=Queue,name=ClientRequestQueue"
+      name="jboss.messaging.destination:service=Queue,name=BalanceQueue"
       xmbean-dd="xmdesc/Queue-xmbean.xml">
       <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
       <depends>jboss.messaging:service=PostOffice</depends>

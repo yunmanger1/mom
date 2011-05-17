@@ -33,8 +33,13 @@ public class DbEJB implements RIDbEJB, LIDbEJB {
 
 	@Override
 	public void changeBalance(String phoneNumber, BigDecimal delta) {
-		int id = accounts.getAccountIdByNumber(phoneNumber);
-		changeBalance(id, delta);
+		log.debug(String.format("Modify balance of: %s by: %s", phoneNumber,
+				delta.toString()));
+		// TODO: get or create
+		// int id = accounts.getAccountIdByNumber(phoneNumber);
+		// changeBalance(id, delta);
+		// TODO: generate change balance event to AppProps.CHANGES_QUEUE_NAME
+
 	}
 
 	@Override

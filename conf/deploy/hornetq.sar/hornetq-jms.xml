@@ -70,8 +70,20 @@
       <entry name="/queue/ExpiryQueue"/>
    </queue>
 
-   <queue name="ClientRequestQueue">
+   <queue name="EventQueue">
       <entry name="/queue/EventQueue"/>
+   </queue>
+
+   <queue name="BalanceQueue">
+      <entry name="/queue/BalanceQueue"/>
+   </queue>
+   
+   <queue name="UnkBalanceQueue">
+      <entry name="/queue/NoneQueue"/>
+   </queue>
+
+   <queue name="ChangesQueue">
+      <entry name="/queue/ChangesQueue"/>
    </queue>
 
 </configuration>
