@@ -2,6 +2,7 @@ package kz.edu.sdu.buben.j2ee.app.mom.mdb;
 
 import java.io.IOError;
 
+import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.MessageDriven;
@@ -9,10 +10,13 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import javax.jms.Queue;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppProps;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.ChangeBalanceDTO;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIBalanceChangeEJB;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
 
 import org.apache.log4j.Logger;
 import org.jboss.ejb3.annotation.ResourceAdapter;
@@ -27,11 +31,11 @@ public class BalanceChangeMDB implements MessageListener {
 	@EJB
 	LIBalanceChangeEJB util;
 
-	// @EJB
-	// LIMessagingService ms;
+	@EJB
+	LIMessagingService ms;
 
-	// @Resource(mappedName = AppProps.NONE_QUEUE_NAME)
-	// private Queue destination;
+	@Resource(mappedName = AppProps.NONE_QUEUE_NAME)
+	private Queue destination;
 
 	@Override
 	public void onMessage(Message msg) {
@@ -59,6 +63,13 @@ public class BalanceChangeMDB implements MessageListener {
 
 	private void forwardMessageToNone(Message msg) {
 		log.debug("UNKNOWN message. forwarding needed");
-		// TODO: implemend forwarding to AppProps.NONE_QUEUE_NAME
+		ms.forwardMessage(destination, msg, new MessageModifier() {
+
+			@Override
+			public void modify(Message message) throws JMSException {
+				message.setStringProperty(AppProps.FORWARD_FROM,
+						AppProps.BALANCE_QUEUE_NAME);
+			}
+		});
 	}
 }

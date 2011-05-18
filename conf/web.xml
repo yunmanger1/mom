@@ -23,9 +23,19 @@
       <servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.SimpleServlet</servlet-class>
     </servlet>
 
+    <servlet>
+      <servlet-name>ListAccountsServlet</servlet-name>
+      <servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.ListAccountsServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
       <servlet-name>SimpleServlet</servlet-name>
       <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+      <servlet-name>ListAccountsServlet</servlet-name>
+      <url-pattern>/list/*</url-pattern>
     </servlet-mapping>
 
 

@@ -18,6 +18,11 @@ import org.apache.log4j.Logger;
 
 public class SimpleServlet extends HttpServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2710324555728113741L;
+
 	private final Logger log = Logger.getLogger(getClass());
 
 	@EJB
@@ -32,18 +37,42 @@ public class SimpleServlet extends HttpServlet {
 		try {
 			PrintWriter out = new PrintWriter(response.getOutputStream());
 			String message = "Hello World!";
+			out.print("<html><body><form method=POST>");
+			out.flush();
 			cmd.sayHello(message);
-			out.printf("<html><body>%s</body></html>", message);
-			try {
-				balance.sayToChangeBalance("7024476704", BigDecimal
-						.valueOf(1000));
-			} catch (InvalidAttributeValueException e) {
-				log.error("Could not send message");
-			}
-			balance.saySthStupid();
+			// out.println("Hi!");
+			out.print("<input type=text name=number value='7024476704'/><br/>");
+			out.print("<input type=text name=amount value='1000.0'/><br/>");
+			out.println("<input type='submit' value='submit'/><br/>");
+			out.println("</form></body></html>");
+			// balance.saySthStupid();
 			out.close();
 		} catch (IOException e) {
-			log.trace(e);
+			log.trace("Ooops");
+		}
+
+	}
+
+	@Override
+	public void doPost(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			PrintWriter out = new PrintWriter(response.getOutputStream());
+			String number = request.getParameter("number");
+			String amount = request.getParameter("amount");
+			try {
+				balance.sayToChangeBalance(number, BigDecimal.valueOf(Double
+						.valueOf(amount)));
+				out.print("<html><body>");
+				out.println("OK");
+				out.println("</body></html>");
+			} catch (InvalidAttributeValueException e) {
+				log.error("Could not send message");
+				out.print("<html><body>");
+				out.println(e.getMessage());
+				out.println("</body></html>");
+			}
+		} catch (IOException e) {
+			log.trace("Oops");
 		}
 
 	}

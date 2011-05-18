@@ -7,7 +7,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.management.InvalidAttributeValueException;
 
@@ -40,7 +40,7 @@ public class BalanceChangeEJB implements LIBalanceChangeEJB {
 	public boolean sendChangeBalance(ChangeBalanceDTO o) {
 		return ms.sendObjectMessage(destination, o, new MessageModifier() {
 			@Override
-			public void modify(ObjectMessage message) throws JMSException {
+			public void modify(Message message) throws JMSException {
 				message.setStringProperty(AppProps.MESSAGE_TYPE,
 						AppProps.CHANGE_BALANCE_MT);
 				message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
