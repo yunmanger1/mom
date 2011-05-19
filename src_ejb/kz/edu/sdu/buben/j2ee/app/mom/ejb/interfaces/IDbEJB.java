@@ -18,4 +18,13 @@ public interface IDbEJB {
 
 	public AccountEntity getOrCreateAccountByNumber(String phoneNumber);
 
+	public boolean reserveCallSession(String fromNumber, String toNumber,
+			int seconds);
+
+	public boolean reserveCallSession(AccountEntity from, AccountEntity to,
+			int seconds);
+
+	public boolean reserveCallSession(AccountEntity from, AccountEntity to,
+			BigDecimal units);
+
 }

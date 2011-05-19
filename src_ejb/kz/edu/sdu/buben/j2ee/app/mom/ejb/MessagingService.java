@@ -1,7 +1,6 @@
 package kz.edu.sdu.buben.j2ee.app.mom.ejb;
 
-import java.io.Serializable;
-
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.jms.Connection;
@@ -10,13 +9,14 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppProps;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
+import kz.edu.sdu.buben.j2ee.app.mom.utils.JoxUtils;
 
 import org.apache.log4j.Logger;
 
@@ -27,23 +27,31 @@ public class MessagingService implements LIMessagingService {
 	@Resource(mappedName = AppProps.CONNECTION_FACTORY_NAME)
 	private ConnectionFactory connectionFactory;
 
-	@Override
-	public boolean sendObjectMessage(Destination destination,
-			Serializable object) {
-		return sendObjectMessage(destination, object, null);
+	private JoxUtils ju;
+
+	@PostConstruct
+	public void init() {
+		ju = new JoxUtils();
 	}
 
 	@Override
-	public boolean sendObjectMessage(Destination destination,
-			Serializable object, MessageModifier modifier) {
+	public boolean sendTextMessage(Destination destination, String text) {
+		return sendTextMessage(destination, text, null);
+	}
+
+	@Override
+	public boolean sendTextMessage(Destination destination, String text,
+			MessageModifier modifier) {
 		try {
 			Connection connection = connectionFactory.createConnection();
 			Session session = connection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
 			try {
 				MessageProducer producer = session.createProducer(destination);
-				ObjectMessage message = session.createObjectMessage();
-				message.setObject(object);
+				TextMessage message = session.createTextMessage();
+				message.setText(text);
+				// ObjectMessage message = session.createObjectMessage();
+				// message.setObject(object);
 				if (modifier != null) {
 					modifier.modify(message);
 				}
@@ -111,4 +119,22 @@ public class MessagingService implements LIMessagingService {
 		return false;
 	}
 
+	@Override
+	public boolean sendObjectMessage(Destination destination, Object object) {
+		return sendObjectMessage(destination, object, null);
+	}
+
+	@Override
+	public boolean sendObjectMessage(Destination destination, Object object,
+			MessageModifier modifier) {
+		String text = null;
+		try {
+			text = ju.toXml(object);
+		} catch (Exception e) {
+			log.error(String.format("Could not convert object: %s", object
+					.getClass().getName()));
+			return false;
+		}
+		return sendTextMessage(destination, text, modifier);
+	}
 }

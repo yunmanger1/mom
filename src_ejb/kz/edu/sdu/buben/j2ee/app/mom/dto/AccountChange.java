@@ -7,19 +7,19 @@ public class AccountChange implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5470538498301446889L;
-	AccountChangeType type;
+	String type;
 	Integer pk;
 
-	public AccountChange(AccountChangeType type, Integer pk) {
+	public AccountChange(String type, Integer pk) {
 		this.type = type;
 		this.pk = pk;
 	}
 
-	public AccountChangeType getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(AccountChangeType type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 

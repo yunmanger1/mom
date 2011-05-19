@@ -8,4 +8,6 @@ public interface IAccountEJB {
 	public int getAccountIdByNumber(String phoneNumber);
 
 	public List<AccountEntity> getAccountList();
+
+	public boolean isValidPhoneNumber(String phoneNumber);
 }
