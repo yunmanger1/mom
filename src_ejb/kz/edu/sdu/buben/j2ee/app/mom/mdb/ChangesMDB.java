@@ -14,8 +14,9 @@ import javax.jms.Queue;
 import javax.jms.TextMessage;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
-import kz.edu.sdu.buben.j2ee.app.mom.dto.ChangeBalanceDTO;
-import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIBalanceEJB;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.AccountChangeDTO;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.DeleteSessionDTO;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIChangesEJB;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
 import kz.edu.sdu.buben.j2ee.app.mom.utils.JoxUtils;
@@ -23,16 +24,16 @@ import kz.edu.sdu.buben.j2ee.app.mom.utils.JoxUtils;
 import org.apache.log4j.Logger;
 import org.jboss.ejb3.annotation.ResourceAdapter;
 
-@MessageDriven(activationConfig = {@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"), @ActivationConfigProperty(propertyName = "destination", propertyValue = AppConsts.BALANCE_QUEUE_NAME)})
+@MessageDriven(activationConfig = {@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"), @ActivationConfigProperty(propertyName = "destination", propertyValue = AppConsts.CHANGES_QUEUE_NAME)})
 @ResourceAdapter("hornetq-ra.rar")
-public class BalanceChangeMDB implements MessageListener {
+public class ChangesMDB implements MessageListener {
    private final Logger log = Logger.getLogger(getClass());
 
    @EJB
    LIMessagingService ms;
 
    @EJB
-   LIBalanceEJB db;
+   LIChangesEJB changesEjb;
 
    @Resource(mappedName = AppConsts.NONE_QUEUE_NAME)
    private Queue destination;
@@ -51,19 +52,12 @@ public class BalanceChangeMDB implements MessageListener {
             throw new IOError(null);
          }
          String type = msg.getStringProperty(AppConsts.MESSAGE_TYPE);
-         if (type.equals(AppConsts.CHANGE_BALANCE_MT)) {
+         if (type.equals(AppConsts.DELETE_SESSION_MT)) {
             String text = ((TextMessage) msg).getText();
-            ChangeBalanceDTO dto = null;
-            try {
-               dto = ju.fromXml(text, ChangeBalanceDTO.class);
-            } catch (Exception e) {
-               log.error("Could not convert xml to object", e);
-               throw new IOError(null);
-            }
-            if (db.changeBalance(dto.getPhoneNumber(), dto.getDelta()) != null) {
-               throw new IOError(null);
-            }
-
+            serveDeleteSessionMessage(text);
+         } else if (type.equals(AppConsts.CHANGE_ACCOUNT_MT)) {
+            String text = ((TextMessage) msg).getText();
+            serveChangeAccountMessage(text);
          } else {
             throw new IOError(null);
          }
@@ -72,6 +66,28 @@ public class BalanceChangeMDB implements MessageListener {
       } catch (JMSException e) {
          log.trace(e.getMessage(), e);
       }
+   }
+
+   private void serveChangeAccountMessage(String text) throws IOError {
+      AccountChangeDTO dto = null;
+      try {
+         dto = ju.fromXml(text, AccountChangeDTO.class);
+      } catch (Exception e) {
+         log.error("Could not convert xml to object", e);
+         throw new IOError(null);
+      }
+      changesEjb.copyAccountStateOnly(dto.getPk(), dto.getType());
+   }
+
+   private void serveDeleteSessionMessage(String text) throws IOError {
+      DeleteSessionDTO dto = null;
+      try {
+         dto = ju.fromXml(text, DeleteSessionDTO.class);
+      } catch (Exception e) {
+         log.error("Could not convert xml to object", e);
+         throw new IOError(null);
+      }
+      changesEjb.moveSession(dto.getType(), dto.getPk());
    }
 
    private void forwardMessageToNone(Message msg) {

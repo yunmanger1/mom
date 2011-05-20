@@ -9,11 +9,11 @@ import org.apache.log4j.Logger;
 
 @Stateless
 public class SimpleEJB implements RISimpleEJB, LISimpleEJB {
-	private final Logger log = Logger.getLogger(getClass());
+   private final Logger log = Logger.getLogger(getClass());
 
-	@Override
-	public void sayHello(String message) {
-		System.out.println(message);
-	}
+   @Override
+   public void sayHello(String message) {
+      System.out.println(message);
+   }
 
 }

@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import kz.edu.sdu.buben.j2ee.app.mom.AppProps;
+import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 
 @Entity
 @Table(name = "reservation")
@@ -18,7 +18,7 @@ public class UnitsReserve {
 	protected int reservationId;
 	protected AccountEntity account;
 	protected BigDecimal reservedUnits = BigDecimal.ZERO;
-	protected int status = AppProps.BEFORE_SESSION_STATUS;
+	protected int status = AppConsts.BEFORE_SESSION_STATUS;
 
 	@Id
 	@Column

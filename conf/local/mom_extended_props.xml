@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="WINDOWS-1251"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+
+   <comment>Mom Serive Props</comment>
+	
+   <entry key="deals.schedule.type">FIXED_RATE</entry>
+   <entry key="deals.schedule.period">SECONDS_10</entry>
+
+<!-- 
+   <entry key="usd_rates.schedule.type">FIXED_RATE</entry>        
+   <entry key="usd_rates.schedule.start.type">CUSTOM_MIN</entry>  
+   <entry key="usd_rates.schedule.period">HOUR</entry>            
+   <entry key="usd_rates.schedule.start.min">10</entry>           
+   <entry key="usd_rates.schedule.breaks">00:25-7:00</entry>
+ -->
+   
+</properties>

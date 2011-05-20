@@ -2,15 +2,12 @@ package kz.edu.sdu.buben.j2ee.app.mom.db;
 
 import java.math.BigDecimal;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -20,8 +17,8 @@ import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 import org.apache.log4j.Logger;
 
 @Entity
-@Table(name = "callsession")
-public class CallSession {
+@Table(name = "callsessionhistory")
+public class CallSessionHistory {
    private final Logger log = Logger.getLogger(getClass());
    protected int sessionId;
    protected AccountEntity from;
@@ -32,9 +29,9 @@ public class CallSession {
    protected int chargedDuration = 0;
    protected int reservedDuration = 0;
    protected BigDecimal chargedUnits = BigDecimal.ZERO;
-   protected UnitsReserve reserve;
-   protected int status = AppConsts.BEFORE_SESSION_STATUS;
+   protected int status = AppConsts.HISTORY_SESSION_STATUS;
    protected java.util.Date chargeDate;
+   protected java.util.Date moveDate;
 
    @Id
    @Column
@@ -112,15 +109,6 @@ public class CallSession {
       this.chargedUnits = chargedUnits;
    }
 
-   @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
-   public UnitsReserve getReserve() {
-      return reserve;
-   }
-
-   public void setReserve(UnitsReserve reserve) {
-      this.reserve = reserve;
-   }
-
    @Column
    public int getStatus() {
       return status;
@@ -130,7 +118,7 @@ public class CallSession {
       this.status = status;
    }
 
-   @Column(nullable = true)
+   @Column
    @Temporal(value = TemporalType.TIMESTAMP)
    public java.util.Date getChargeDate() {
       return chargeDate;
@@ -138,6 +126,16 @@ public class CallSession {
 
    public void setChargeDate(java.util.Date chargeDate) {
       this.chargeDate = chargeDate;
+   }
+
+   @Column
+   @Temporal(value = TemporalType.TIMESTAMP)
+   public java.util.Date getMoveDate() {
+      return moveDate;
+   }
+
+   public void setMoveDate(java.util.Date moveDate) {
+      this.moveDate = moveDate;
    }
 
    @Column

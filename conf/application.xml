@@ -9,6 +9,9 @@
     <ejb>mom.jar</ejb>
   </module>
   <module>
+    <ejb>mom.sar</ejb>
+  </module>
+  <module>
     <web>
       <web-uri>mom.war</web-uri>
       <context-root>/mom</context-root>
