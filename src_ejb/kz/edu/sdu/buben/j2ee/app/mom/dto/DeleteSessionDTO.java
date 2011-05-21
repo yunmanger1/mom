@@ -1,7 +1,8 @@
 package kz.edu.sdu.buben.j2ee.app.mom.dto;
 
-
 public class DeleteSessionDTO {
+   public static final String ALIAS = "deletesession";
+
    Integer type;
    Integer pk;
 

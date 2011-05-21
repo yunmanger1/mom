@@ -54,7 +54,7 @@ public class TestJMSSendJndi {
 
    @Test
    public void testAddBalance() throws NamingException, JMSException, InterruptedException {
-      balanceEjb.changeBalance("7024476704", BigDecimal.TEN);
+      balanceEjb.changeBalance("7024476704", BigDecimal.valueOf(100));
    }
 
    @Test

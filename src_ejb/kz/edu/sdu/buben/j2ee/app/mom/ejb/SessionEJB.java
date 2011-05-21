@@ -2,6 +2,7 @@ package kz.edu.sdu.buben.j2ee.app.mom.ejb;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -27,7 +28,7 @@ import kz.edu.sdu.buben.j2ee.app.mom.utils.SessionUtils;
 
 import org.apache.log4j.Logger;
 
-@Stateless
+@Stateless(name = "SessionEJB")
 public class SessionEJB implements RISessionEJB, LISessionEJB {
    private final Logger log = Logger.getLogger(getClass());
 
@@ -82,15 +83,6 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
       return cs;
    }
 
-   private BigDecimal getReservedUnits(AccountEntity account) {
-      Query q = em.createQuery("SELECT SUM(ur.reservedUnits) FROM UnitsReserve ur WHERE ur.status = :active AND ur.account = :account").setParameter("active", AppConsts.ACTIVE_SESSION_STATUS).setParameter("account", account);
-      BigDecimal result = (BigDecimal) q.getSingleResult();
-      if (result == null) {
-         result = BigDecimal.ZERO;
-      }
-      return result;
-   }
-
    @Override
    public boolean reserveCallSession(String fromNumber, String toNumber, int seconds) {
       AccountEntity from = accountEjb.getOrCreateAccountByNumber(fromNumber);
@@ -101,7 +93,6 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
       return false;
    }
 
-   @Override
    public boolean reserveCallSession(AccountEntity from, AccountEntity to, int seconds) {
       BigDecimal cost = calculateCostOf(from, seconds);
       return reserveCallSession(from, to, seconds, cost);
@@ -116,10 +107,11 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
             log.debug(String.format("Reserve units is early for: %d seconds", cs.getReservedDuration() - secondsNow));
             return true;
          }
+
       } else {
          cs = createActiveCallSession(from, to);
       }
-      BigDecimal avail = from.getBalance().subtract(getReservedUnits(from));
+      BigDecimal avail = from.getBalance().subtract(balanceEjb.getReservedUnits(from.getAccount_id()));
       if (avail.compareTo(units) >= 0) {
          UnitsReserve rs = cs.getReserve();
          if (rs == null) {
@@ -203,7 +195,6 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
       overCallSessionOnDate(from, to, endDate);
    }
 
-   @Override
    public void overCallSessionOnDate(AccountEntity from, AccountEntity to, Date endDate) {
       CallSession cs = getActiveCallSession(from, to);
       if (cs != null) {
@@ -211,7 +202,6 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
       }
    }
 
-   @Override
    public void overCallSession(AccountEntity from, AccountEntity to) {
       overCallSessionOnDate(from, to, new Date());
    }
@@ -231,4 +221,10 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
          log.error(String.format("Error sending CHARGE_SESSION: %d", cs.getSessionId()));
       }
    }
+
+   @Override
+   public List<CallSession> getActiveCallSessionList() {
+      return em.createQuery("SELECT cs FROM CallSession cs WHERE cs.status = :active").setParameter("active", AppConsts.ACTIVE_SESSION_STATUS).getResultList();
+   }
+
 }

@@ -1,6 +1,7 @@
 package kz.edu.sdu.buben.j2ee.app.mom.dto;
 
 public class AccountChangeDTO {
+   public static final String ALIAS = "accountchange";
    String type;
    Integer pk;
 

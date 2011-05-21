@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.jms.Queue;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 import kz.edu.sdu.buben.j2ee.app.mom.db.AccountEntity;
@@ -65,6 +66,54 @@ public class BalanceEJB implements LIBalanceEJB, RIBalanceEJB {
          return changeBalance(ac, delta);
       } else {
          log.error(String.format("No account for: %s", phoneNumber));
+      }
+      return null;
+   }
+
+   public BigDecimal getReservedUnits(String phoneNumber) {
+      AccountEntity ac = accountEjb.getOrCreateAccountByNumber(phoneNumber);
+      if (ac != null) {
+         return getReservedUnits(ac);
+      }
+      return null;
+   }
+
+   private BigDecimal getReservedUnits(AccountEntity account) {
+      Query q = em.createQuery("SELECT SUM(ur.reservedUnits) FROM UnitsReserve ur WHERE ur.status = :active AND ur.account = :account").setParameter("active", AppConsts.ACTIVE_SESSION_STATUS).setParameter("account", account);
+      BigDecimal result = (BigDecimal) q.getSingleResult();
+      if (result == null) {
+         result = BigDecimal.ZERO;
+      }
+      return result;
+   }
+
+   @Override
+   public BigDecimal getReservedUnits(int accountId) {
+      AccountEntity ac = accountEjb.getAccountById(accountId);
+      if (ac != null) {
+         return getReservedUnits(ac);
+      }
+      return null;
+   }
+
+   @Override
+   public BigDecimal getAvailableUnits(String phoneNumber) {
+      AccountEntity ac = accountEjb.getOrCreateAccountByNumber(phoneNumber);
+      if (ac != null) {
+         return getAvailableUnits(ac);
+      }
+      return null;
+   }
+
+   private BigDecimal getAvailableUnits(AccountEntity ac) {
+      return ac.getBalance().subtract(getReservedUnits(ac));
+   }
+
+   @Override
+   public BigDecimal getAvailableUnits(int accountId) {
+      AccountEntity ac = accountEjb.getAccountById(accountId);
+      if (ac != null) {
+         return getAvailableUnits(ac);
       }
       return null;
    }

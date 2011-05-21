@@ -7,6 +7,7 @@ import javax.jms.Message;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
 
 public class AppConsts {
+   public static final String APP_CONTEXT_NAME = "mom";
    public static final String MESSAGE_TYPE = "MESSAGE_TYPE";
 
    public static final String CHANGE_BALANCE_MT = "CHANGE_BALANCE";
@@ -34,6 +35,8 @@ public class AppConsts {
 
    public static final int SESSION_TYPE_CALL = 0;
    public static final int SESSION_TYPE_G3 = 1;
+
+   public static final String LOCAL_NAME_SESSIONEJB = String.format("%s/SessionEJB/local", APP_CONTEXT_NAME);
 
    public static MessageModifier CHARGE_SESSION_MODIFIER = new MessageModifier() {
       @Override

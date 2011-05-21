@@ -9,6 +9,7 @@ import kz.bips.comps.threads.ScheduleRecord;
 import kz.bips.comps.utils.Log4JLoggerWrapper;
 import kz.edu.sdu.buben.j2ee.app.mom.AppProps;
 
+import org.jboss.ejb3.annotation.Depends;
 import org.jboss.ejb3.annotation.Management;
 import org.jboss.ejb3.annotation.Service;
 
@@ -18,6 +19,7 @@ import org.jboss.ejb3.annotation.Service;
  */
 @Service
 @Management(ITestServiceManagement.class)
+@Depends({"jboss.j2ee:ear=mom.ear,jar=mom.jar,name=SessionEJB,service=EJB3"})
 //@Depends({"jboss.jca:name=IrisImpDealsDS,service=DataSourceBinding", "jboss.jca:name=IrisImpCSOraDS,service=DataSourceBinding"})
 public class ITestService implements ITestServiceManagement {
    protected Log4JLoggerWrapper log = new Log4JLoggerWrapper(getClass());
@@ -34,18 +36,7 @@ public class ITestService implements ITestServiceManagement {
       log.info("TestService: Starting...");
 
       List<ScheduleRecord> schedules = new ArrayList<ScheduleRecord>();
-      schedules.add(new TestScheduleRecord());
-//      schedules.add(new NbrkScheduleRecord());
-//      schedules.add(new OrdersScheduleRecord());
-//      schedules.add(new DealsScheduleRecord());
-//      schedules.add(new DealsTestScheduleRecord());
-//
-//      schedules.add(new RepoScheduleRecord());
-//
-//      schedules.add(new KaseDayEndScheduleRecord());
-//
-//      schedules.add(new GzbScheduleRecord());
-//
+      schedules.add(new CallSessionScheduleRecord());
       mainThread = new MultiScheduleWorkingThread("TestThread", AppProps.getProps(), schedules);
       mainThread.start();
    }

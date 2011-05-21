@@ -1,0 +1,174 @@
+
+<project name="mom" default="deploy" basedir=".">
+    <description>
+        simple example build file
+    </description>
+  <!-- set global properties for this build -->
+  <property name="src.ejb" location="src_ejb"/>
+  <property name="src.war" location="src_war"/>
+  <property name="src.sar" location="src_sar"/>
+  <property name="build.ejb" location="build_ejb"/>
+  <property name="build.war" location="build_war"/>
+  <property name="build.sar" location="build_sar"/>
+  <property name="dist"  location="dist"/>
+  <property name="jboss510" location="/home/german/distr/jboss-5.1.0.GA"/>
+  <property name="project.name" value="mom" />
+  <property name="project.version" value="0.0.1" />
+  <property name="company.name" value="buben.kz" />
+  <property name="conf" location="conf" />
+  <property name="bin" location="bin" />
+
+  <target name="init" depends="clean">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.ejb}"/>
+  	<mkdir dir="${build.war}"/>
+  	<mkdir dir="${build.sar}"/>
+  	<mkdir dir="${dist}"/>
+  	<path id="project.class.path">
+  	   <!--fileset dir="${conf}/lib/" id="vaadin.lib">
+          <include name="vaadin-6.0.8148.jar" />
+  	   </fileset-->
+		<fileset dir="${conf}/lib/" id="ext.lib">
+			<include name="bips_base_utils.jar"/>
+			<include name="xpp3_min-1.1.4c.jar"/>
+			<include name="xstream-1.3.1.jar"/>
+		</fileset>
+		<fileset dir="${jboss510}/common/lib/" id="common.lib">
+		    <include name="jboss-javaee.jar"/>
+			<include name="ejb3-persistence.jar"/>
+			<include name="servlet-api.jar"/>
+			<include name="mail-plugin.jar" />
+			<include name="mail.jar"/>
+		</fileset>
+		<fileset dir="${jboss510}/client/" id="client.lib">
+			<include name="log4j.jar"/>
+			<include name="jboss-ejb3-ext-api.jar"/>
+		</fileset>
+  	</path>
+  </target>
+
+  <target name="compile.ejb" depends="init" description="compile the source ejb" >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src.ejb}" destdir="${bin}" debug="true" classpathref="project.class.path"/>
+    <javac srcdir="${src.ejb}" destdir="${build.ejb}" debug="true" classpathref="project.class.path"/>
+  </target>
+
+  <target name="compile.war" depends="init, compile.ejb" description="compile the source war" >
+	<!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src.war}" destdir="${bin}" debug="true">
+      <classpath refid="project.class.path"></classpath>
+      <classpath location="${bin}"></classpath>
+    </javac>
+    <javac srcdir="${src.war}" destdir="${build.war}" debug="true">
+    	<classpath refid="project.class.path"></classpath>
+    	<classpath location="${build.ejb}"></classpath>
+    </javac>
+  </target>
+
+  <target name="compile.sar" depends="init,compile.ejb" description="compile the source sar" >
+    <javac srcdir="${src.sar}" destdir="${build.sar}" debug="true">
+    	<classpath refid="project.class.path"></classpath>
+    	<classpath location="${build.ejb}"></classpath>
+    	<classpath location="${build.sar}"></classpath>
+    </javac>
+  </target>	
+	
+  <target name="libs" depends="compile.ejb, compile.war" description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+
+    <!-- Put everything in ${build} into the FSample-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/lib/fsample-client-libs-${DSTAMP}.jar" basedir="${build.ejb}/kz/edu/sdu/buben/j2ee/app/fraud/client/"/>
+  </target>
+
+  <target name="jar" depends="clean, compile.ejb" description="Building Jar">
+  	 <mkdir dir="${dist}" />
+  	 <mkdir dir="${build.ejb}/META-INF" />
+  	 <copy todir="${build.ejb}/META-INF" file="${conf}/META-INF/persistence.xml"/>
+	 <jar destfile="${dist}/${project.name}.jar" basedir="${build.ejb}">
+	    <include name="**"/>	 	
+	 	<metainf dir="${conf}/META-INF" file="persistence.xml"/>
+	    <manifest>
+	      <!-- Who is building this jar? -->
+	      <attribute name="Built-By" value="${user.name}"/>
+	      <!-- Information about the program itself -->
+	      <attribute name="Implementation-Vendor" value="${company.name}"/>
+	      <attribute name="Implementation-Title" value="${project.name}"/>
+	      <attribute name="Implementation-Version" value="${project.version}"/>
+	    </manifest>
+	 </jar>
+  </target>
+
+  <target name="war" depends="compile.war" description="Building Dist War">
+  	 <war destfile="${dist}/${project.name}.war" webxml="${conf}/web.xml">
+  	 	<classes  dir="${build.war}" includes="**"/>
+       <lib dir="${conf}/lib" >
+          <include name="vaadin-6.0.8148.jar" />
+       </lib>
+  	 </war>
+  </target>
+	
+  <target name="sar" depends="compile.sar" description="Build Dist Sar">
+    <!--attribute name="metainfdir" default="${sar.metainf.dir}" /-->
+    <jar basedir="${build.sar}" includes="**/sar/**/*" excludes="**/META-INF/*" jarfile="${dist}/${project.name}.sar" />
+  </target>
+	
+  <target name="ear" depends="jar,war,sar" description="Building Dist Ear">
+  	 <ear destfile="${dist}/${project.name}.ear" appxml="${conf}/application.xml">
+  	 	<fileset dir="${dist}" includes="*.jar,*.war,*.sar"/>
+  	 	<!-- <metainf dir="${conf}" includes="jboss-app.xml" /> -->
+  	 </ear>
+  </target>
+	
+  <target name="deploy" depends="clean, ear">
+  	 <copy todir="${jboss510}/server/${project.name}/deploy/" file="${dist}/${project.name}.ear"></copy>
+  </target>
+
+  <target name="deploy-confs">
+    <copy todir="${jboss510}/server/${project.name}/deploy/" file="${conf}/deploy/mysql-ds.xml"></copy>
+  	<copy todir="${jboss510}/server/${project.name}/conf/" file="${conf}/local/mom_extended_props.xml"></copy>
+    <!--copy todir="${jboss510}/server/${project.name}/deploy/" file="${conf}/deploy/mail-service.xml"></copy-->
+    <!--copy todir="${jboss510}/server/${project.name}/deploy/messaging/" file="${conf}/deploy/messaging/destinations-service.xml"></copy-->
+  </target>
+
+  <target name="deploy-libs">
+    <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/bips_base_utils.jar"></copy>
+    <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xpp3_min-1.1.4c.jar"></copy>
+    <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xstream-1.3.1.jar"></copy>
+    <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/dtdparser119.jar"></copy-->
+    <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/jox-1.17b5.jar"></copy-->
+    <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xercesImpl.jar"></copy-->
+  </target>
+	
+  <target name="undeploy-libs">
+    <delete file="${jboss510}/server/${project.name}/lib/bips_base_utils.jar" />
+    <delete file="${jboss510}/server/${project.name}/lib/dtdparser119.jar"/>
+    <delete file="${jboss510}/server/${project.name}/lib/jox-1.17b5.jar"/>
+    <delete file="${jboss510}/server/${project.name}/lib/xercesImpl.jar"/>
+  </target>
+
+  <target name="undeploy-confs">    
+    <delete file="${jboss510}/server/j2ee/deploy/mysql-ds.xml"/>
+    <delete file="${jboss510}/server/j2ee/deploy/mail-service.xml"/>
+    <delete file="${jboss510}/server/j2ee/deploy/messaging/destinations-service.xml"/>
+  </target>
+	
+  <target name="clean" description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+  	<!-- <delete dir="bin"/> -->
+  	<delete dir="${build.war}"/>
+  	<delete dir="${build.ejb}"/>
+  	<delete dir="${build.sar}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="undeploy" description="undeploy the bean" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${dist}"/>
+  	<delete file="${jboss510}/server/j2ee/deploy/${project.name}.ear"/>
+  </target>
+
+	
+</project>

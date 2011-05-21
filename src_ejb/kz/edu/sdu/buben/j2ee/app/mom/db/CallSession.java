@@ -47,7 +47,7 @@ public class CallSession {
       this.sessionId = sessionId;
    }
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.EAGER)
    public AccountEntity getFrom() {
       return from;
    }
@@ -56,7 +56,7 @@ public class CallSession {
       this.from = from;
    }
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.EAGER)
    public AccountEntity getTo() {
       return to;
    }

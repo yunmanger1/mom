@@ -12,4 +12,12 @@ public interface IBalanceEJB {
 
    public BigDecimal changeBalance(String phoneNumber, BigDecimal delta);
 
+   public BigDecimal getReservedUnits(String phoneNumber);
+
+   public BigDecimal getReservedUnits(int accountId);
+
+   public BigDecimal getAvailableUnits(String phoneNumber);
+
+   public BigDecimal getAvailableUnits(int accountId);
+
 }

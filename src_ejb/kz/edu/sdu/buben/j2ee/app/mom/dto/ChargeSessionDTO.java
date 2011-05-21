@@ -1,6 +1,7 @@
 package kz.edu.sdu.buben.j2ee.app.mom.dto;
 
 public class ChargeSessionDTO {
+   public static final String ALIAS = "chargesession";
 
    protected int session_type;
    protected int session_id;

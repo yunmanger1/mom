@@ -8,6 +8,8 @@ import kz.edu.sdu.buben.j2ee.app.mom.db.AccountEntity;
 public interface IAccountEJB {
    public int getAccountIdByNumber(String phoneNumber);
 
+   public AccountEntity getAccountById(int accountId);
+
    public List<AccountEntity> getAccountList();
 
    public boolean isValidPhoneNumber(String phoneNumber);

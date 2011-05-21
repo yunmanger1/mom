@@ -15,10 +15,10 @@ import javax.jms.TextMessage;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.ChargeSessionDTO;
-import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LISessionEJB;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LISessionEJB;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
-import kz.edu.sdu.buben.j2ee.app.mom.utils.JoxUtils;
+import kz.edu.sdu.buben.j2ee.app.mom.utils.XStreamUtils;
 
 import org.apache.log4j.Logger;
 import org.jboss.ejb3.annotation.ResourceAdapter;
@@ -37,11 +37,12 @@ public class EventMDB implements MessageListener {
    @Resource(mappedName = AppConsts.NONE_QUEUE_NAME)
    private Queue destination;
 
-   private JoxUtils ju;
+   private XStreamUtils ju;
 
    @PostConstruct
    public void init() {
-      ju = new JoxUtils();
+      ju = new XStreamUtils();
+      ju.a(ChargeSessionDTO.ALIAS, ChargeSessionDTO.class);
    }
 
    @Override

@@ -94,4 +94,9 @@ public class AccountEJB implements LIAccountEJB {
       }
       return result;
    }
+
+   @Override
+   public AccountEntity getAccountById(int accountId) {
+      return em.find(AccountEntity.class, accountId);
+   }
 }
