@@ -18,10 +18,10 @@
       <description> Again, some description </description>
     </context-param-->
     
-    <servlet>
+    <!-- servlet>
       <servlet-name>SimpleServlet</servlet-name>
       <servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.SimpleServlet</servlet-class>
-    </servlet>
+    </servlet-->
 
     <servlet>
       <servlet-name>ListAccountsServlet</servlet-name>
@@ -38,6 +38,22 @@
       <servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.BalanceServlet</servlet-class>
     </servlet>
 
+	<context-param>
+		<description>Vaadin production mode</description>
+		<param-name>productionMode</param-name>
+		<param-value>false</param-value>
+	</context-param>
+	<servlet>
+		<servlet-name>VaadinServlet</servlet-name>
+		<!-- servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class-->
+		<servlet-class>kz.edu.sdu.buben.j2ee.app.mom.servlets.VaadinServlet</servlet-class>
+		<init-param>
+			<description>Vaadin application class to start</description>
+			<param-name>application</param-name>
+			<param-value>kz.edu.sdu.buben.j2ee.app.mom.vaadin.SimpleAddressBook</param-value>
+		</init-param>
+	</servlet>
+
     <servlet-mapping>
       <servlet-name>CallSessionServlet</servlet-name>
       <url-pattern>/call/*</url-pattern>
@@ -53,10 +69,15 @@
       <url-pattern>/list/*</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>VaadinServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+    <!-- servlet-mapping>
       <servlet-name>SimpleServlet</servlet-name>
       <url-pattern>/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping-->
 
 
     <session-config>

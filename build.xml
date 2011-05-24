@@ -11,12 +11,15 @@
   <property name="build.war" location="build_war"/>
   <property name="build.sar" location="build_sar"/>
   <property name="dist"  location="dist"/>
-  <property name="jboss510" location="/home/german/distr/jboss-5.1.0.GA"/>
+  <property name="jboss510" location="/opt/jboss-5.1.0.GA"/>
   <property name="project.name" value="mom" />
   <property name="project.version" value="0.0.1" />
   <property name="company.name" value="buben.kz" />
   <property name="conf" location="conf" />
   <property name="bin" location="bin" />
+  <property name="web.dir" location="conf/WebContent"/>	
+  <property name="vaadin.jar" value="vaadin-6.6.0.jar"/>
+  <!--property name="vaadin.jar" location="vaadin-6.6.0.jar" /-->
 
   <target name="init" depends="clean">
     <!-- Create the time stamp -->
@@ -34,6 +37,7 @@
 			<include name="bips_base_utils.jar"/>
 			<include name="xpp3_min-1.1.4c.jar"/>
 			<include name="xstream-1.3.1.jar"/>
+			<include name="${vaadin.jar}"/>
 		</fileset>
 		<fileset dir="${jboss510}/common/lib/" id="common.lib">
 		    <include name="jboss-javaee.jar"/>
@@ -103,9 +107,10 @@
 
   <target name="war" depends="compile.war" description="Building Dist War">
   	 <war destfile="${dist}/${project.name}.war" webxml="${conf}/web.xml">
-  	 	<classes  dir="${build.war}" includes="**"/>
+  	   <fileset dir="${web.dir}" includes="**"/>
+  	   <classes  dir="${build.war}" includes="**"/>
        <lib dir="${conf}/lib" >
-          <include name="vaadin-6.0.8148.jar" />
+          <include name="${vaadin.jar}" />
        </lib>
   	 </war>
   </target>
@@ -128,6 +133,7 @@
 
   <target name="deploy-confs">
     <copy todir="${jboss510}/server/${project.name}/deploy/" file="${conf}/deploy/mysql-ds.xml"></copy>
+    <copy todir="${jboss510}/server/${project.name}/deploy/hornetq.sar/" file="${conf}/deploy/hornetq.sar/hornetq-jms.xml"></copy>
   	<copy todir="${jboss510}/server/${project.name}/conf/" file="${conf}/local/mom_extended_props.xml"></copy>
     <!--copy todir="${jboss510}/server/${project.name}/deploy/" file="${conf}/deploy/mail-service.xml"></copy-->
     <!--copy todir="${jboss510}/server/${project.name}/deploy/messaging/" file="${conf}/deploy/messaging/destinations-service.xml"></copy-->
@@ -135,6 +141,7 @@
 
   <target name="deploy-libs">
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/bips_base_utils.jar"></copy>
+    <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/mysql-connector-java-5.1.7-bin.jar"></copy>
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xpp3_min-1.1.4c.jar"></copy>
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xstream-1.3.1.jar"></copy>
     <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/dtdparser119.jar"></copy-->
@@ -151,8 +158,10 @@
 
   <target name="undeploy-confs">    
     <delete file="${jboss510}/server/j2ee/deploy/mysql-ds.xml"/>
-    <delete file="${jboss510}/server/j2ee/deploy/mail-service.xml"/>
-    <delete file="${jboss510}/server/j2ee/deploy/messaging/destinations-service.xml"/>
+    <delete file="${jboss510}/server/${project.name}/deploy/hornetq.sar/hornetq-jms.xml"/>
+  	<delete file="${jboss510}/server/${project.name}/conf/mom_extended_props.xml"/>
+    <!--delete file="${jboss510}/server/j2ee/deploy/mail-service.xml"/-->
+    <!--delete file="${jboss510}/server/j2ee/deploy/messaging/destinations-service.xml"/-->
   </target>
 	
   <target name="clean" description="clean up" >
