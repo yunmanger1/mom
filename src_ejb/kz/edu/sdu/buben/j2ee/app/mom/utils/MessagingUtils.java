@@ -1,12 +1,8 @@
-package kz.edu.sdu.buben.j2ee.app.mom.ejb;
+package kz.edu.sdu.buben.j2ee.app.mom.utils;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -15,24 +11,24 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
-import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
+import kz.bips.comps.utils.Log4JLoggerWrapper;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.IMessagingService;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
-import kz.edu.sdu.buben.j2ee.app.mom.utils.XStreamUtils;
 
-import org.apache.log4j.Logger;
+public class MessagingUtils implements IMessagingService {
+   private final Log4JLoggerWrapper log = new Log4JLoggerWrapper(getClass());
 
-@Stateless
-@TransactionAttribute(TransactionAttributeType.MANDATORY)
-public class MessagingService implements LIMessagingService {
-   private final Logger log = Logger.getLogger(getClass());
-
-   @Resource(mappedName = AppConsts.CONNECTION_FACTORY_NAME)
-   private ConnectionFactory connectionFactory;
+//   @Resource(mappedName = AppConsts.CONNECTION_FACTORY_NAME)
+   private final ConnectionFactory connectionFactory;
 
    private XStreamUtils ju;
 
-   @PostConstruct
+   public MessagingUtils(ConnectionFactory cf) {
+      connectionFactory = cf;
+      init();
+   }
+
+//   @PostConstruct
    public void init() {
       ju = new XStreamUtils();
    }
@@ -44,36 +40,45 @@ public class MessagingService implements LIMessagingService {
 
    @Override
    public boolean sendTextMessage(Destination destination, String text, MessageModifier modifier) {
-      try {
-         Connection connection = connectionFactory.createConnection();
-         Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+      if (destination == null) {
+         log.error("destination == null");
+      } else if (text == null) {
+         log.error("text == null");
+      } else if (connectionFactory == null) {
+         log.error("cf == null");
+      } else {
          try {
-            MessageProducer producer = session.createProducer(destination);
-            TextMessage message = session.createTextMessage();
-            message.setText(text);
-            // ObjectMessage message = session.createObjectMessage();
-            // message.setObject(object);
-            if (modifier != null) {
-               modifier.modify(message);
+            Connection connection = connectionFactory.createConnection();
+            Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+            try {
+               MessageProducer producer = session.createProducer(destination);
+               producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+               TextMessage message = session.createTextMessage();
+               message.setText(text);
+               // ObjectMessage message = session.createObjectMessage();
+               // message.setObject(object);
+               if (modifier != null) {
+                  modifier.modify(message);
+               }
+               producer.send(message);
+               if (destination instanceof Queue) {
+                  log.debug(String.format("Success sending to: %s", ((Queue) destination).getQueueName()));
+               } else {
+                  log.debug("Success sending");
+               }
+//               producer.close();
+            } finally {
+//               if (session != null) {
+//                  session.close();
+//               }
+               if (connection != null) {
+                  connection.close();
+               }
             }
-            producer.send(message);
-            if (destination instanceof Queue) {
-               log.debug(String.format("Success sending to: %s", ((Queue) destination).getQueueName()));
-            } else {
-               log.debug("Success sending");
-            }
-            producer.close();
-         } finally {
-            if (session != null) {
-               session.close();
-            }
-            if (connection != null) {
-               connection.close();
-            }
+            return true;
+         } catch (JMSException e) {
+            log.trace("JMS send crash");
          }
-         return true;
-      } catch (JMSException e) {
-         log.trace("JMS send crash");
       }
       return false;
    }
@@ -133,4 +138,5 @@ public class MessagingService implements LIMessagingService {
       }
       return sendTextMessage(destination, text, modifier);
    }
+
 }

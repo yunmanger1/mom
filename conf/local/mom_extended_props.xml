@@ -8,7 +8,7 @@
    <entry key="test.schedule.period">SECONDS_10</entry>
 
    <entry key="callsession.schedule.type">FIXED_RATE</entry>
-   <entry key="callsession.schedule.period">SECONDS_10</entry>
+   <entry key="callsession.schedule.period">SECOND</entry>
 
 <!-- 
    <entry key="usd_rates.schedule.type">FIXED_RATE</entry>        

@@ -10,6 +10,8 @@ public interface ISessionEJB {
 
    public List<CallSession> getActiveCallSessionList();
 
+   public List<CallSession> getActiveExpiredCallSessionList();
+
    public void chargeSession(int sessionType, int sessionId);
 
    public void chargeCallSession(int sessionId);

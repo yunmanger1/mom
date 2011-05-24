@@ -1,6 +1,5 @@
 package kz.edu.sdu.buben.j2ee.app.mom;
 
-import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
@@ -19,7 +18,9 @@ public class AppConsts {
    public static final String EVENT_QUEUE_NAME = "/queue/EventQueue";
    public static final String CHANGES_QUEUE_NAME = "/queue/ChangesQueue";
    public static final String NONE_QUEUE_NAME = "/queue/NoneQueue";
-   public static final String CONNECTION_FACTORY_NAME = "java:/ConnectionFactory";
+
+   public static final String CONNECTION_FACTORY_NAME = "java:/JmsXA";
+//   public static final String CONNECTION_FACTORY_NAME = "java:/ConnectionFactory";
 
    public static final String FORWARD_FROM = "FORWARD_FROM";
 
@@ -42,6 +43,7 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHARGE_SESSION_MT);
+//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 
@@ -49,7 +51,7 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.DELETE_SESSION_MT);
-         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 
@@ -58,6 +60,7 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHANGE_ACCOUNT_MT);
+//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 
@@ -65,7 +68,7 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHANGE_BALANCE_MT);
-         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 

@@ -17,22 +17,20 @@ import javax.persistence.TemporalType;
 
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 
-import org.apache.log4j.Logger;
-
 @Entity
 @Table(name = "callsession")
 public class CallSession {
-   private final Logger log = Logger.getLogger(getClass());
    protected int sessionId;
    protected AccountEntity from;
    protected AccountEntity to;
    protected java.util.Date startDate;
    protected java.util.Date endDate;
    protected long duration = 0;
-   protected int chargedDuration = 0;
-   protected int reservedDuration = 0;
+   protected long chargedDuration = 0;
    protected BigDecimal chargedUnits = BigDecimal.ZERO;
    protected UnitsReserve reserve;
+   protected long reservedDuration = 0;
+   protected java.util.Date reserveEndDate;
    protected int status = AppConsts.BEFORE_SESSION_STATUS;
    protected java.util.Date chargeDate;
 
@@ -95,11 +93,11 @@ public class CallSession {
    }
 
    @Column
-   public int getChargedDuration() {
+   public long getChargedDuration() {
       return chargedDuration;
    }
 
-   public void setChargedDuration(int chargedDuration) {
+   public void setChargedDuration(long chargedDuration) {
       this.chargedDuration = chargedDuration;
    }
 
@@ -141,12 +139,22 @@ public class CallSession {
    }
 
    @Column
-   public int getReservedDuration() {
+   public long getReservedDuration() {
       return reservedDuration;
    }
 
-   public void setReservedDuration(int reservedDuration) {
+   public void setReservedDuration(long reservedDuration) {
       this.reservedDuration = reservedDuration;
+   }
+
+   @Column
+   @Temporal(value = TemporalType.TIMESTAMP)
+   public java.util.Date getReserveEndDate() {
+      return reserveEndDate;
+   }
+
+   public void setReserveEndDate(java.util.Date reserveEndDate) {
+      this.reserveEndDate = reserveEndDate;
    }
 
 }

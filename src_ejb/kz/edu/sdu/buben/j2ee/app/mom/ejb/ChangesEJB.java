@@ -46,6 +46,7 @@ public class ChangesEJB implements LIChangesEJB {
          csh.setChargeDate(cs.getChargeDate());
          csh.setMoveDate(new java.util.Date());
          csh.setReservedDuration(cs.getReservedDuration());
+         csh.setReserveEndDate(cs.getReserveEndDate());
          em.persist(csh);
          log.debug(String.format("Move CallSession to CallSessionHistory: csId=%d, cshId=%d", cs.getSessionId(), csh.getSessionId()));
          em.remove(cs);

@@ -15,8 +15,8 @@ public class SessionUtils {
       }
    }
 
-   public static int getNotChargedDurationInSeconds(CallSession cs) {
-      return (int) ((cs.getDuration() / 1000) - cs.getChargedDuration());
+   public static long getNotChargedDuration(CallSession cs) {
+      return (cs.getDuration() - cs.getChargedDuration());
    }
 
    public static void calculateCurDuration(CallSession cs) {

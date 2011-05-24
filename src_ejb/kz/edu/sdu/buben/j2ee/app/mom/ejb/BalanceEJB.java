@@ -46,7 +46,7 @@ public class BalanceEJB implements LIBalanceEJB, RIBalanceEJB {
       AccountChangeDTO dto = new AccountChangeDTO();
       dto.setPk(ac.getAccount_id());
       dto.setType(AppConsts.BALANCE_ACCOUNT_CHANGE);
-      log.error(String.format("Charge Balance: account=%s, units=%.2f", ac.getPhone_number(), delta));
+      log.debug(String.format("Charge Balance: account=%s, units=%.2f", ac.getPhone_number(), delta));
       if (!ms.sendObjectMessage(changesQueue, dto, AppConsts.CHANGE_ACCOUNT_MODIFIER)) {
          log.error(String.format("Error sending CHANGE_ACCOUNT: %d", ac.getAccount_id()));
       }

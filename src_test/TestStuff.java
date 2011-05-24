@@ -37,7 +37,7 @@ public class TestStuff {
 
    @Test
    public void testBDTO() throws Exception {
-      BalanceRequestDTO dto = new BalanceRequestDTO(BalanceRequestType.CHARGE, "7024476704", BigDecimal.valueOf(100));
+      BalanceRequestDTO dto = new BalanceRequestDTO(BalanceRequestType.ADD, "7024476704", BigDecimal.valueOf(100));
       XStreamUtils ju = new XStreamUtils();
       ju.a(BalanceRequestDTO.ALIAS, BalanceRequestDTO.class);
       System.out.println(ju.toXml(dto));

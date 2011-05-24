@@ -81,7 +81,7 @@ public class BalanceServlet extends HttpServlet {
                case BLOCKED :
                   result = balanceEjb.getReservedUnits(dto.getPhonenumber());
                   break;
-               case CHARGE :
+               case ADD :
                   result = balanceEjb.changeBalance(dto.getPhonenumber(), dto.getUnits());
                   break;
                default :

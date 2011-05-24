@@ -50,9 +50,9 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
    @Resource(mappedName = AppConsts.EVENT_QUEUE_NAME)
    Queue eventQueue;
 
-   private BigDecimal calculateCostOf(AccountEntity account, int seconds) {
+   private BigDecimal calculateCostOf(AccountEntity account, long millisecs) {
       // TODO: Pricing plan
-      return BigDecimal.valueOf(seconds);
+      return BigDecimal.valueOf(millisecs / 1000);
    }
 
    private CallSession getActiveCallSession(AccountEntity from, AccountEntity to) {
@@ -98,13 +98,14 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
       return reserveCallSession(from, to, seconds, cost);
    }
 
-   public boolean reserveCallSession(AccountEntity from, AccountEntity to, int seconds, BigDecimal units) {
+   public boolean reserveCallSession(AccountEntity from, AccountEntity to, long millisecs, BigDecimal units) {
+      millisecs *= 1000;
       CallSession cs = getActiveCallSession(from, to);
       if (cs != null) {
          SessionUtils.calculateCurDuration(cs);
-         int secondsNow = (int) (cs.getDuration() / 1000);
-         if (cs.getReservedDuration() > secondsNow) {
-            log.debug(String.format("Reserve units is early for: %d seconds", cs.getReservedDuration() - secondsNow));
+         long durationNow = cs.getDuration();
+         if (cs.getReservedDuration() > durationNow) {
+            log.debug(String.format("Reserve units is early for: %d seconds", cs.getReservedDuration() - durationNow));
             return true;
          }
 
@@ -120,11 +121,12 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
             rs.setStatus(cs.getStatus());
          }
          rs.setReservedUnits(rs.getReservedUnits().add(units));
-         cs.setReservedDuration(cs.getReservedDuration() + seconds);
+         cs.setReservedDuration(cs.getReservedDuration() + millisecs);
          em.persist(rs);
          cs.setReserve(rs);
+         cs.setReserveEndDate(new Date(cs.getStartDate().getTime() + cs.getReservedDuration()));
          em.persist(cs);
-         log.debug(String.format("Reserve units for CallSession: from=%s, to=%s, units=%.2f, seconds=%s", cs.getFrom().getPhone_number(), cs.getTo().getPhone_number(), units, seconds));
+         log.debug(String.format("Reserve units for CallSession: from=%s, to=%s, units=%.2f, seconds=%s", cs.getFrom().getPhone_number(), cs.getTo().getPhone_number(), units, millisecs));
          return true;
       } else {
          overCallSession(from, to);
@@ -136,27 +138,27 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
    public void chargeCallSession(int sessionId) {
       CallSession cs = em.find(CallSession.class, sessionId);
       if (cs != null) {
-         int seconds = 0;
+         long millisecs = 0;
          if (cs.getStatus() == AppConsts.OVER_SESSION_STATUS) {
-            seconds = SessionUtils.getNotChargedDurationInSeconds(cs);
+            millisecs = SessionUtils.getNotChargedDuration(cs);
             cs.setStatus(AppConsts.DELETED_SESSION_STATUS);
             // NOW RESERVE STATUS IS CHANGED, AND WILL NOT BE COUNTED IN COUNTING AVAILABLE BALANCE
             cs.getReserve().setStatus(AppConsts.DELETED_SESSION_STATUS);
          } else if (cs.getStatus() == AppConsts.ACTIVE_SESSION_STATUS) {
             SessionUtils.calculateCurDuration(cs);
-            seconds = SessionUtils.getNotChargedDurationInSeconds(cs);
+            millisecs = SessionUtils.getNotChargedDuration(cs);
          } else {
             log.error(String.format("Invalid call session status: %d", cs.getStatus()));
             return;
          }
-         BigDecimal chargeUnits = calculateCostOf(cs.getFrom(), seconds);
+         BigDecimal chargeUnits = calculateCostOf(cs.getFrom(), millisecs);
          balanceEjb.changeBalance(cs.getFrom(), chargeUnits.negate());
-         cs.setChargedDuration(cs.getChargedDuration() + seconds);
+         cs.setChargedDuration(cs.getChargedDuration() + millisecs);
          cs.setChargedUnits(cs.getChargedUnits().add(chargeUnits));
          cs.setChargeDate(new Date());
          em.persist(cs.getReserve());
          em.persist(cs);
-         log.debug(String.format("Charge CallSession: from=%s, to=%s, %.2f", cs.getFrom().getPhone_number(), cs.getTo().getPhone_number(), chargeUnits));
+         log.debug(String.format("Charge CallSession: cs=%d, from=%s, to=%s, %.2f", cs.getSessionId(), cs.getFrom().getPhone_number(), cs.getTo().getPhone_number(), chargeUnits));
          DeleteSessionDTO dto = new DeleteSessionDTO();
          dto.setPk(cs.getSessionId());
          dto.setType(AppConsts.SESSION_TYPE_CALL);
@@ -176,6 +178,7 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
             break;
 
          case AppConsts.SESSION_TYPE_G3 :
+            log.warn("3G session are not implemented yet");
             //TODO: chargeG3Session(sessionId);
             break;
          default :
@@ -225,6 +228,11 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
    @Override
    public List<CallSession> getActiveCallSessionList() {
       return em.createQuery("SELECT cs FROM CallSession cs WHERE cs.status = :active").setParameter("active", AppConsts.ACTIVE_SESSION_STATUS).getResultList();
+   }
+
+   @Override
+   public List<CallSession> getActiveExpiredCallSessionList() {
+      return em.createQuery("SELECT cs FROM CallSession cs WHERE cs.reserveEndDate <= :now AND cs.status = :active").setParameter("now", new Date()).setParameter("active", AppConsts.ACTIVE_SESSION_STATUS).getResultList();
    }
 
 }
