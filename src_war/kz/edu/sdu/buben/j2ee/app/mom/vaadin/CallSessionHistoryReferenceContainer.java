@@ -17,19 +17,19 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 
-public class CallSessionReferenceContainer implements Container, Container.ItemSetChangeNotifier {
+public class CallSessionHistoryReferenceContainer implements Container, Container.ItemSetChangeNotifier {
 
-   public static final Object[] NATURAL_COL_ORDER = new String[]{"sessionId", "from", "to", "startDate", "endDate", "duration", "reserveEndDate", "reservedDuration", "chargedDuration", "chargedUnits", "chargeDate"};
+   public static final Object[] NATURAL_COL_ORDER = new String[]{"sessionId", "from", "to", "startDate", "endDate", "duration", "chargedDuration", "reservedDuration", "reserveEndDate", "chargedUnits", "status", "chargeDate"};
    protected static final Collection<Object> NATURAL_COL_ORDER_COLL = Collections.unmodifiableList(Arrays.asList(NATURAL_COL_ORDER));
    protected final LIVaadinEJB vaadinEjb;
    protected List<CallSessionReference> csReferences;
    protected Map<Object, CallSessionReference> idIndex;
-   public static QueryMetaData defaultQueryMetaData = new QueryMetaData(new String[]{"from", "to"}, new boolean[]{true, true});
+   public static QueryMetaData defaultQueryMetaData = new QueryMetaData(new String[]{"moveDate"}, new boolean[]{false});
    protected QueryMetaData queryMetaData = defaultQueryMetaData;
 
    // Some fields omitted
 
-   public CallSessionReferenceContainer(LIVaadinEJB vaadinEJB) {
+   public CallSessionHistoryReferenceContainer(LIVaadinEJB vaadinEJB) {
       this.vaadinEjb = vaadinEJB;
    }
 
@@ -39,7 +39,7 @@ public class CallSessionReferenceContainer implements Container, Container.ItemS
 
    public void refresh(QueryMetaData queryMetaData) {
       this.queryMetaData = queryMetaData;
-      csReferences = vaadinEjb.getActiveCallSessionList(queryMetaData, (String[]) NATURAL_COL_ORDER);
+      csReferences = vaadinEjb.getLastCallSessionHistoryList(queryMetaData, (String[]) NATURAL_COL_ORDER);
       idIndex = new HashMap<Object, CallSessionReference>(csReferences.size());
       for (CallSessionReference pf : csReferences) {
          idIndex.put(pf.getSessionId(), pf);

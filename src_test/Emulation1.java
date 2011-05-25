@@ -19,11 +19,11 @@ public class Emulation1 {
 //         rn[i].join();
 //      }
       System.out.printf("Took %d ms to add 100 to balance start all sessions", System.currentTimeMillis() - start);
-      for (int i = 0; i < N; i += 2) {
-         String from = String.format("701%07d", i);
-         String to = String.format("701%07d", i + 1);
-         EmulationUtils.overSession(from, to);
-      }
+//      for (int i = 0; i < N; i += 2) {
+//         String from = String.format("701%07d", i);
+//         String to = String.format("701%07d", i + 1);
+//         EmulationUtils.overSession(from, to);
+//      }
    }
 
    public static class Request extends Thread implements Runnable {

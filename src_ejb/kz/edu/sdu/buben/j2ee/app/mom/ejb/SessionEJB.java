@@ -94,7 +94,7 @@ public class SessionEJB implements RISessionEJB, LISessionEJB {
    }
 
    public boolean reserveCallSession(AccountEntity from, AccountEntity to, int seconds) {
-      BigDecimal cost = calculateCostOf(from, seconds);
+      BigDecimal cost = calculateCostOf(from, seconds * 1000);
       return reserveCallSession(from, to, seconds, cost);
    }
 

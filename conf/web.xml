@@ -52,6 +52,10 @@
 			<param-name>application</param-name>
 			<param-value>kz.edu.sdu.buben.j2ee.app.mom.vaadin.SimpleAddressBook</param-value>
 		</init-param>
+		<init-param>
+    		<param-name>widgetset</param-name>
+    		<param-value>com.github.wolfie.refresher.RefresherApplicationWidgetset</param-value>
+		</init-param>
 	</servlet>
 
     <servlet-mapping>

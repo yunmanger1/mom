@@ -4,22 +4,7 @@
         simple example build file
     </description>
   <!-- set global properties for this build -->
-  <property name="src.ejb" location="src_ejb"/>
-  <property name="src.war" location="src_war"/>
-  <property name="src.sar" location="src_sar"/>
-  <property name="build.ejb" location="build_ejb"/>
-  <property name="build.war" location="build_war"/>
-  <property name="build.sar" location="build_sar"/>
-  <property name="dist"  location="dist"/>
-  <property name="jboss510" location="/home/german/distr/jboss-5.1.0.GA"/>
-  <property name="project.name" value="mom" />
-  <property name="project.version" value="0.0.1" />
-  <property name="company.name" value="buben.kz" />
-  <property name="conf" location="conf" />
-  <property name="bin" location="bin" />
-  <property name="web.dir" location="conf/WebContent"/>	
-  <property name="vaadin.jar" value="vaadin-6.6.0.jar"/>
-  <!--property name="vaadin.jar" location="vaadin-6.6.0.jar" /-->
+  <property file="${basedir}/conf/local/build.properties" />
 
   <target name="init" depends="clean">
     <!-- Create the time stamp -->
@@ -60,23 +45,19 @@
     <javac srcdir="${src.ejb}" destdir="${build.ejb}" debug="true" classpathref="project.class.path"/>
   </target>
 
-  <target name="compile.war" depends="init, compile.ejb" description="compile the source war" >
+  <target name="compile.war" depends="init" description="compile the source war" >
 	<!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src.war}" destdir="${bin}" debug="true">
-      <classpath refid="project.class.path"></classpath>
-      <classpath location="${bin}"></classpath>
-    </javac>
     <javac srcdir="${src.war}" destdir="${build.war}" debug="true">
     	<classpath refid="project.class.path"></classpath>
+    	<sourcepath location="${src.ejb}"></sourcepath>
     	<classpath location="${build.ejb}"></classpath>
     </javac>
   </target>
 
-  <target name="compile.sar" depends="init,compile.ejb" description="compile the source sar" >
+  <target name="compile.sar" depends="init" description="compile the source sar" >
     <javac srcdir="${src.sar}" destdir="${build.sar}" debug="true">
     	<classpath refid="project.class.path"></classpath>
-    	<classpath location="${build.ejb}"></classpath>
-    	<classpath location="${build.sar}"></classpath>
+    	<sourcepath location="${src.ejb}"></sourcepath>
     </javac>
   </target>	
 	
@@ -93,7 +74,7 @@
   	 <mkdir dir="${build.ejb}/META-INF" />
   	 <copy todir="${build.ejb}/META-INF" file="${conf}/META-INF/persistence.xml"/>
 	 <jar destfile="${dist}/${project.name}.jar" basedir="${build.ejb}">
-	    <include name="**"/>	 	
+	    <include name="**"/>
 	 	<metainf dir="${conf}/META-INF" file="persistence.xml"/>
 	    <manifest>
 	      <!-- Who is building this jar? -->
@@ -111,8 +92,8 @@
   	   <fileset dir="${web.dir}" includes="**"/>
   	   <classes  dir="${build.war}" includes="**"/>
        <lib dir="${conf}/lib" >
-       	<include name="refresher-1.1.0.jar" />
-          <include name="${vaadin.jar}" />
+       	  <include name="refresher-1.1.0.jar" />
+          <!--include name="${vaadin.jar}" /-->
        </lib>
   	 </war>
   </target>
@@ -146,6 +127,7 @@
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/mysql-connector-java-5.1.7-bin.jar"></copy>
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xpp3_min-1.1.4c.jar"></copy>
     <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xstream-1.3.1.jar"></copy>
+    <copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/${vaadin.jar}"></copy>
     <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/dtdparser119.jar"></copy-->
     <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/jox-1.17b5.jar"></copy-->
     <!--copy todir="${jboss510}/server/${project.name}/lib/" file="${conf}/lib/xercesImpl.jar"></copy-->
@@ -180,6 +162,58 @@
     <delete dir="${dist}"/>
   	<delete file="${jboss510}/server/j2ee/deploy/${project.name}.ear"/>
   </target>
+	
+	<!-- NOTE: Modify this example to compile your own widgetset -->
+	<target name="configure-widgetset">
+	    <echo>Modify this example Ant script to compile your own widget sets.</echo>
+	
+	    <!-- Name of the widget set -->
+	    <property name="widgetset" value="com.github.wolfie.refresher.RefresherApplicationWidgetset"/>
+	
+	    <!-- Define if the widget set be generated automatically -->
+	    <!-- from all widget sets included in the class path.    -->
+	    <!--property name="generate.widgetset" value="1"/--> 
+	    
+	    <!-- Path to the widgetset directory. Required only for --> 
+		<!-- generated widget sets. Must be relative to         --> 
+		<!-- $war.src.dir, that is, under the first entry in   --> 
+		<!--  class path.                                       --> 
+	    <property name="widgetset-path" value="${src.war}"/>
+	</target>
+	
+	<target name="generate-widgetset" depends="compile.war, configure-widgetset" if="generate.widgetset">
+	    
+	    <!-- Create the directory if it does not already exist. -->
+	    <!--mkdir dir="${war.dir}/${widgetset-path}"/-->
+	    
+	    <java classname="com.vaadin.terminal.gwt.widgetsetutils.WidgetSetBuilder"
+	          failonerror="yes" fork="yes" maxmemory="256m">
+	        <arg value="${widgetset}"/>
+	        <jvmarg value="-Xss1024k"/>
+	        <jvmarg value="-Djava.awt.headless=true"/>
+	        <classpath>
+	            <path refid="project.class.path"/>
+	        </classpath>
+	    </java>
+	</target>
+	
+	<!-- Build the widget set. -->
+	<target name="compile-widgetset" depends="compile.war, generate-widgetset">
+		<echo>Compiling ${widgetset}...</echo>
+		
+		<java classname="com.google.gwt.dev.Compiler" failonerror="yes" fork="yes" maxmemory="256m">
+			<arg value="-war" />
+			<arg value="${client-side-destination}" />
+			<arg value="${widgetset}" />
+	        <jvmarg value="-Xss1024k"/>
+	        <jvmarg value="-Djava.awt.headless=true"/>
+			<classpath>
+				<path refid="project.class.path"/>
+				<pathelement location="${gwt-location}/gwt-dev.jar"/>
+				<pathelement location="${gwt-location}/gwt-user.jar"/>
+			</classpath>
+		</java>
+	</target>
 
 	
 </project>

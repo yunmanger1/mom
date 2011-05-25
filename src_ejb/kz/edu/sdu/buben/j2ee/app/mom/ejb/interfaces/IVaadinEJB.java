@@ -9,8 +9,9 @@ import kz.edu.sdu.buben.j2ee.app.mom.dto.vaadin.QueryMetaData;
 public interface IVaadinEJB {
 
    public CallSession getCallSession(Long id);
-   
+
    public List<CallSessionReference> getActiveCallSessionList(QueryMetaData queryMetaData, String... propertyNames);
 
+   public List<CallSessionReference> getLastCallSessionHistoryList(QueryMetaData queryMetaData, String... propertyNames);
 
 }

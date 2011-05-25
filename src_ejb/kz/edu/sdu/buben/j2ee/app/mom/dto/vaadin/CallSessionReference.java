@@ -1,6 +1,7 @@
 package kz.edu.sdu.buben.j2ee.app.mom.dto.vaadin;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,18 +14,26 @@ import com.vaadin.data.util.ObjectProperty;
 
 public class CallSessionReference implements Serializable, Item {
 
-   private Long sessionId;
-   private Map<Object, Property> propertyMap;
+   private final Integer sessionId;
+   private final Map<Object, Property> propertyMap;
 
-   public CallSessionReference(Long personId, Map<String, Object> propertyMap) {
-      this.sessionId = personId;
+   public CallSessionReference(Integer sessionId, Map<String, Object> propertyMap) {
+      this.sessionId = sessionId;
       this.propertyMap = new HashMap<Object, Property>();
       for (Entry<String, Object> entry : propertyMap.entrySet()) {
-         this.propertyMap.put(entry.getKey(), new ObjectProperty(entry.getValue()));
+         if (entry.getValue() != null) {
+            if (entry.getValue() instanceof BigDecimal) {
+               this.propertyMap.put(entry.getKey(), new ObjectProperty(((BigDecimal) entry.getValue()).toString()));
+            } else {
+               this.propertyMap.put(entry.getKey(), new ObjectProperty(entry.getValue()));
+            }
+         } else {
+            this.propertyMap.put(entry.getKey(), new ObjectProperty("not set"));
+         }
       }
    }
 
-   public Long getSessionId() {
+   public Integer getSessionId() {
       return sessionId;
    }
 
@@ -32,7 +41,7 @@ public class CallSessionReference implements Serializable, Item {
       return propertyMap.get(id);
    }
 
-   public Collection<?> getItemPropertyIds() {
+   public Collection< ? > getItemPropertyIds() {
       return Collections.unmodifiableSet(propertyMap.keySet());
    }
 
