@@ -1,0 +1,13 @@
+@import "../reindeer/styles.css";
+
+.v-table-cell-content-marked {
+	background-color: red !important;
+	font-weight: bold !important;
+	color: white !important;
+}
+
+.v-table-row-marked {
+	font-weight: bold !important;
+	background-color: green !important;
+	color: white !important;
+}

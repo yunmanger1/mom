@@ -5,9 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import kz.bips.comps.utils.Log4JLoggerWrapper;
 import kz.edu.sdu.buben.j2ee.app.mom.db.CallSession;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.vaadin.CallSessionReference;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.vaadin.QueryMetaData;
@@ -19,11 +22,17 @@ import com.vaadin.data.Property;
 
 public class CallSessionReferenceContainer implements Container, Container.ItemSetChangeNotifier {
 
+   Log4JLoggerWrapper log = new Log4JLoggerWrapper(getClass());
+
    public static final Object[] NATURAL_COL_ORDER = new String[]{"sessionId", "from", "to", "startDate", "endDate", "duration", "reserveEndDate", "reservedDuration", "chargedDuration", "chargedUnits", "chargeDate"};
    protected static final Collection<Object> NATURAL_COL_ORDER_COLL = Collections.unmodifiableList(Arrays.asList(NATURAL_COL_ORDER));
+
+   protected static final Object ROW = Integer.valueOf(-1);
    protected final LIVaadinEJB vaadinEjb;
    protected List<CallSessionReference> csReferences;
    protected Map<Object, CallSessionReference> idIndex;
+   protected Map<Object, CallSessionReference> oldIdIndex;
+   public HashMap<Object, HashSet<Object>> markedCells;
    public static QueryMetaData defaultQueryMetaData = new QueryMetaData(new String[]{"from", "to"}, new boolean[]{true, true});
    protected QueryMetaData queryMetaData = defaultQueryMetaData;
 
@@ -40,9 +49,39 @@ public class CallSessionReferenceContainer implements Container, Container.ItemS
    public void refresh(QueryMetaData queryMetaData) {
       this.queryMetaData = queryMetaData;
       csReferences = vaadinEjb.getActiveCallSessionList(queryMetaData, (String[]) NATURAL_COL_ORDER);
+      oldIdIndex = idIndex;
+      markedCells = new HashMap<Object, HashSet<Object>>();
       idIndex = new HashMap<Object, CallSessionReference>(csReferences.size());
       for (CallSessionReference pf : csReferences) {
          idIndex.put(pf.getSessionId(), pf);
+      }
+      if (oldIdIndex != null) {
+         for (Entry<Object, CallSessionReference> e : idIndex.entrySet()) {
+            CallSessionReference newCs = e.getValue();
+            CallSessionReference oldCs = oldIdIndex.get(e.getKey());
+            if (oldCs != null) {
+               HashSet<Object> cells = markedCells.get(e.getKey());
+               if (cells == null) {
+                  cells = new HashSet<Object>();
+                  markedCells.put(e.getKey(), cells);
+               }
+
+               for (Object field : NATURAL_COL_ORDER) {
+
+                  if (!oldCs.getItemProperty(field).toString().equals(newCs.getItemProperty(field).toString())) {
+                     cells.add(field);
+                     log.debug("Must be marked: %s->%s: %s != %s", newCs.getSessionId(), field, oldCs.getItemProperty(field), newCs.getItemProperty(field));
+                  }
+               }
+            } else {
+               HashSet<Object> cells = markedCells.get(e.getKey());
+               if (cells == null) {
+                  cells = new HashSet<Object>();
+                  markedCells.put(e.getKey(), cells);
+               }
+               cells.add(ROW);
+            }
+         }
       }
       notifyListeners();
    }

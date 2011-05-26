@@ -8,17 +8,19 @@ public class Emulation1 {
       for (int i = 0; i < N; i += 2) {
          String from = String.format("701%07d", i);
          String to = String.format("701%07d", i + 1);
-         EmulationUtils.addBalance(from, 30);
+         EmulationUtils.addBalance(from, 60);
          EmulationUtils.reserveCall(from, to);
-//         rn[k++] = new Request(from, to);
+//            rn[k++] = new Request(from, to);
+         if (i % 10 == 0)
+            Thread.sleep(20000);
       }
-//      for (int i = 0; i < k; i++) {
-//         rn[i].start();
-//      }
-//      for (int i = 0; i < k; i++) {
-//         rn[i].join();
-//      }
-      System.out.printf("Took %d ms to add 100 to balance start all sessions", System.currentTimeMillis() - start);
+//         for (int i = 0; i < k; i++) {
+//            rn[i].start();
+//         }
+//         for (int i = 0; i < k; i++) {
+//            rn[i].join();
+//         }
+      System.out.printf("Took %d ms to add balance start all sessions", System.currentTimeMillis() - start);
 //      for (int i = 0; i < N; i += 2) {
 //         String from = String.format("701%07d", i);
 //         String to = String.format("701%07d", i + 1);
