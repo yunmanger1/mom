@@ -56,7 +56,7 @@ public class ChangesMDB implements MessageListener {
          if (type.equals(AppConsts.DELETE_SESSION_MT)) {
             String text = ((TextMessage) msg).getText();
             serveDeleteSessionMessage(text);
-         } else if (type.equals(AppConsts.CHANGE_ACCOUNT_MT)) {
+         } else if (type.equals(AppConsts.CHANGE_ACCOUNT_MT) || type.equals(AppConsts.CHANGE_BALANCE_MT)) {
             String text = ((TextMessage) msg).getText();
             serveChangeAccountMessage(text);
          } else {
@@ -92,7 +92,7 @@ public class ChangesMDB implements MessageListener {
    }
 
    private void forwardMessageToNone(Message msg) {
-      log.debug("UNKNOWN message. forwarding needed");
+      log.debug("Changes MDB: UNKNOWN message. forwarding needed");
       ms.forwardMessage(destination, msg, new MessageModifier() {
 
          @Override

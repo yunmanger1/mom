@@ -14,6 +14,7 @@ import javax.jms.TextMessage;
 import kz.bips.comps.utils.Log4JLoggerWrapper;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.IMessagingService;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessagesSender;
 
 public class MessagingUtils implements IMessagingService {
    private final Log4JLoggerWrapper log = new Log4JLoggerWrapper(getClass());
@@ -49,7 +50,7 @@ public class MessagingUtils implements IMessagingService {
       } else {
          try {
             Connection connection = connectionFactory.createConnection();
-            Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             try {
                MessageProducer producer = session.createProducer(destination);
                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
@@ -66,6 +67,7 @@ public class MessagingUtils implements IMessagingService {
                } else {
                   log.debug("Success sending");
                }
+               System.out.println("Success");
 //               producer.close();
             } finally {
 //               if (session != null) {
@@ -78,6 +80,7 @@ public class MessagingUtils implements IMessagingService {
             return true;
          } catch (JMSException e) {
             log.trace("JMS send crash");
+            e.printStackTrace();
          }
       }
       return false;
@@ -137,6 +140,44 @@ public class MessagingUtils implements IMessagingService {
          return false;
       }
       return sendTextMessage(destination, text, modifier);
+   }
+
+   @Override
+   public void sendMultipleObjectMessages(Destination destination, MessagesSender ms) throws JMSException {
+      if (destination == null) {
+         log.error("destination == null");
+      } else if (connectionFactory == null) {
+         log.error("cf == null");
+      } else {
+         try {
+            Connection connection = connectionFactory.createConnection();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            try {
+               MessageProducer producer = session.createProducer(destination);
+               ms.sendMessages(this, session, producer);
+               producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+            } finally {
+               if (connection != null) {
+                  connection.close();
+               }
+            }
+         } catch (JMSException e) {
+            log.trace("JMS send crash");
+            e.printStackTrace();
+         }
+      }
+   }
+
+   @Override
+   public Message prepareMessage(Session session, Object obj) throws JMSException {
+      TextMessage message = session.createTextMessage();
+      message.setText(ju.toXml(obj));
+      return message;
+   }
+
+   @Override
+   public XStreamUtils a(String alias, Class clazz) {
+      return ju.a(alias, clazz);
    }
 
 }

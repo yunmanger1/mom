@@ -36,8 +36,8 @@ public class BalanceEJB implements LIBalanceEJB, RIBalanceEJB {
    @Resource(mappedName = AppConsts.CHANGES_QUEUE_NAME)
    Queue changesQueue;
 
-   @Resource(mappedName = AppConsts.EVENT_QUEUE_NAME)
-   Queue eventQueue;
+//   @Resource(mappedName = AppConsts.EVENT_QUEUE_NAME)
+//   Queue eventQueue;
 
    @Override
    public BigDecimal changeBalance(AccountEntity ac, BigDecimal delta) {

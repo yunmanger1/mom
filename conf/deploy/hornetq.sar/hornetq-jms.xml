@@ -74,6 +74,14 @@
       <entry name="/queue/EventQueue"/>
    </queue>
 
+   <queue name="SessionRequestQueue">
+      <entry name="/queue/SessionRequestQueue"/>
+   </queue>
+
+   <queue name="SessionReplyQueue">
+      <entry name="/queue/SessionReplyQueue"/>
+   </queue>
+
    <queue name="BalanceQueue">
       <entry name="/queue/BalanceQueue"/>
    </queue>

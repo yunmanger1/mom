@@ -17,6 +17,7 @@ import kz.edu.sdu.buben.j2ee.app.mom.dto.CallSessionRequestDTO;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.ResponseDTO;
 import kz.edu.sdu.buben.j2ee.app.mom.dto.ResponseType;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LISessionEJB;
+import kz.edu.sdu.buben.j2ee.app.mom.utils.SessionUtils;
 import kz.edu.sdu.buben.j2ee.app.mom.utils.XStreamUtils;
 
 public class CallSessionServlet extends HttpServlet {
@@ -60,8 +61,9 @@ public class CallSessionServlet extends HttpServlet {
       long t = System.currentTimeMillis();
       response.setContentType("application/xml");
       ResponseDTO rdto = new ResponseDTO();
+      PrintWriter out = null;
       try {
-         PrintWriter out = new PrintWriter(response.getOutputStream());
+         out = new PrintWriter(response.getOutputStream());
          BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()));
          String line = null;
          PVNStringBuilder sb = new PVNStringBuilder();
@@ -70,33 +72,18 @@ public class CallSessionServlet extends HttpServlet {
             log.debug(line);
             sb.a(line);
          }
-         try {
-            CallSessionRequestDTO dto = ju.fromXml(sb.toString(), CallSessionRequestDTO.class);
-            boolean result = true;
-            switch (dto.getRequesttype()) {
-               case RESERVE :
-                  result = sessionEjb.reserveCallSession(dto.getFromnumber(), dto.getTonumber(), dto.getReserveseconds());
-                  break;
-               case OVER :
-                  sessionEjb.overCallSession(dto.getFromnumber(), dto.getTonumber());
-                  break;
-               default :
-                  break;
-            }
-            if (result) {
-               rdto.setResult(ResponseType.OK);
-            } else {
-               rdto.setResult(ResponseType.FALSE);
-            }
-         } catch (Exception e) {
-            log.logStackTrace(e, "CallSession request fail");
-            rdto.setResult(ResponseType.FAIL);
-         }
-         out.println(ju.toXml(rdto));
-         out.close();
-      } catch (Exception e) {
+         CallSessionRequestDTO dto = ju.fromXml(sb.toString(), CallSessionRequestDTO.class);
+         rdto = SessionUtils.requestSession(sessionEjb, dto);
+      } catch (IOException e) {
          log.logStackTrace(e, "asdasd");
+      } catch (Exception e) {
+         log.logStackTrace(e, "CallSession request fail");
+         rdto.setResult(ResponseType.FAIL);
       } finally {
+         if (out != null) {
+            out.println(ju.toXml(rdto));
+            out.close();
+         }
          log.debug("request took: %d ms", System.currentTimeMillis() - t);
       }
    }

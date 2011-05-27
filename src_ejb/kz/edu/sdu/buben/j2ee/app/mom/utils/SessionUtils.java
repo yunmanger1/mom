@@ -1,6 +1,10 @@
 package kz.edu.sdu.buben.j2ee.app.mom.utils;
 
 import kz.edu.sdu.buben.j2ee.app.mom.db.CallSession;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.CallSessionRequestDTO;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.ResponseDTO;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.ResponseType;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.ISessionEJB;
 
 import org.apache.log4j.Logger;
 
@@ -26,5 +30,26 @@ public class SessionUtils {
          log.error(String.format("Start date is null: start = %s", cs.getStartDate()));
       }
 
+   }
+
+   public static ResponseDTO requestSession(ISessionEJB sessionEjb, CallSessionRequestDTO dto) {
+      ResponseDTO rdto = new ResponseDTO();
+      boolean result = true;
+      switch (dto.getRequesttype()) {
+         case RESERVE :
+            result = sessionEjb.reserveCallSession(dto.getFromnumber(), dto.getTonumber(), dto.getReserveseconds());
+            break;
+         case OVER :
+            sessionEjb.overCallSession(dto.getFromnumber(), dto.getTonumber());
+            break;
+         default :
+            break;
+      }
+      if (result) {
+         rdto.setResult(ResponseType.OK);
+      } else {
+         rdto.setResult(ResponseType.FALSE);
+      }
+      return rdto;
    }
 }

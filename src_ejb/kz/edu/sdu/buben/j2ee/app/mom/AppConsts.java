@@ -13,11 +13,14 @@ public class AppConsts {
    public static final String CHANGE_ACCOUNT_MT = "CHANGE_ACCOUNT";
    public static final String CHARGE_SESSION_MT = "CHARGE_SESSION";
    public static final String DELETE_SESSION_MT = "DELETE_SESSION";
+   public static final String REQUEST_SESSION_MT = "REQUEST_SESSION";
 
    public static final String BALANCE_QUEUE_NAME = "/queue/BalanceQueue";
    public static final String EVENT_QUEUE_NAME = "/queue/EventQueue";
    public static final String CHANGES_QUEUE_NAME = "/queue/ChangesQueue";
    public static final String NONE_QUEUE_NAME = "/queue/NoneQueue";
+   public static final String REQSESS_QUEUE_NAME = "/queue/SessionRequestQueue";
+   public static final String REPSESS_QUEUE_NAME = "/queue/SessionReplyQueue";
 
    public static final String CONNECTION_FACTORY_NAME = "java:/JmsXA";
 //   public static final String CONNECTION_FACTORY_NAME = "java:/ConnectionFactory";
@@ -43,7 +46,13 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHARGE_SESSION_MT);
-//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+      }
+   };
+
+   public static MessageModifier REQUEST_SESSION_MODIFIER = new MessageModifier() {
+      @Override
+      public void modify(Message message) throws JMSException {
+         message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.REQUEST_SESSION_MT);
       }
    };
 
@@ -51,7 +60,6 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.DELETE_SESSION_MT);
-//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 
@@ -60,7 +68,6 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHANGE_ACCOUNT_MT);
-//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 
@@ -68,7 +75,6 @@ public class AppConsts {
       @Override
       public void modify(Message message) throws JMSException {
          message.setStringProperty(AppConsts.MESSAGE_TYPE, AppConsts.CHANGE_BALANCE_MT);
-//         message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
       }
    };
 

@@ -18,6 +18,7 @@ import javax.jms.TextMessage;
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessagesSender;
 import kz.edu.sdu.buben.j2ee.app.mom.utils.XStreamUtils;
 
 import org.apache.log4j.Logger;
@@ -132,5 +133,22 @@ public class MessagingService implements LIMessagingService {
          return false;
       }
       return sendTextMessage(destination, text, modifier);
+   }
+
+   @Override
+   public Message prepareMessage(Session session, Object obj) throws JMSException {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public void sendMultipleObjectMessages(Destination destination, MessagesSender ms) throws JMSException {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public XStreamUtils a(String alias, Class clazz) {
+      return ju.a(alias, clazz);
    }
 }

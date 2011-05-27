@@ -76,7 +76,7 @@ public class EventMDB implements MessageListener {
    }
 
    private void forwardMessageToNone(Message msg) {
-      log.debug("UNKNOWN message. forwarding needed");
+      log.debug("EventMDB: UNKNOWN message. forwarding needed");
       ms.forwardMessage(destination, msg, new MessageModifier() {
 
          @Override

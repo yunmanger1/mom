@@ -6,6 +6,7 @@ public class CallSessionRequestDTO {
    String fromnumber;
    String tonumber;
    Integer reserveseconds;
+   Long requestid = Long.valueOf(0);
 
    public CallSessionRequestDTO() {
 
@@ -52,6 +53,14 @@ public class CallSessionRequestDTO {
 
    public void setReserveseconds(Integer reserveseconds) {
       this.reserveseconds = reserveseconds;
+   }
+
+   public Long getRequestid() {
+      return requestid;
+   }
+
+   public void setRequestid(Long requestid) {
+      this.requestid = requestid;
    }
 
 }

@@ -13,70 +13,77 @@ import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 
+import kz.bips.comps.utils.Log4JLoggerWrapper;
 import kz.edu.sdu.buben.j2ee.app.mom.AppConsts;
-import kz.edu.sdu.buben.j2ee.app.mom.dto.ChangeBalanceDTO;
-import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIBalanceEJB;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.CallSessionRequestDTO;
+import kz.edu.sdu.buben.j2ee.app.mom.dto.ResponseDTO;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LIMessagingService;
+import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.LISessionEJB;
 import kz.edu.sdu.buben.j2ee.app.mom.ejb.interfaces.MessageModifier;
+import kz.edu.sdu.buben.j2ee.app.mom.utils.SessionUtils;
 import kz.edu.sdu.buben.j2ee.app.mom.utils.XStreamUtils;
 
-import org.apache.log4j.Logger;
 import org.jboss.ejb3.annotation.ResourceAdapter;
 
-@MessageDriven(activationConfig = {@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"), @ActivationConfigProperty(propertyName = "destination", propertyValue = AppConsts.BALANCE_QUEUE_NAME)})
+@MessageDriven(activationConfig = {@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"), @ActivationConfigProperty(propertyName = "destination", propertyValue = AppConsts.REQSESS_QUEUE_NAME)})
 @ResourceAdapter("hornetq-ra.rar")
-public class BalanceChangeMDB implements MessageListener {
-   private final Logger log = Logger.getLogger(getClass());
+public class SessionMDB implements MessageListener {
+   private final Log4JLoggerWrapper log = new Log4JLoggerWrapper(getClass());
 
    @EJB
    LIMessagingService ms;
 
    @EJB
-   LIBalanceEJB db;
+   LISessionEJB db;
 
    @Resource(mappedName = AppConsts.NONE_QUEUE_NAME)
    private Queue destination;
+
+   @Resource(mappedName = AppConsts.REPSESS_QUEUE_NAME)
+   private Queue replyQueue;
 
    private XStreamUtils ju;
 
    @PostConstruct
    public void init() {
       ju = new XStreamUtils();
-      ju.a(ChangeBalanceDTO.ALIAS, ChangeBalanceDTO.class);
+      ju.a(CallSessionRequestDTO.ALIAS, CallSessionRequestDTO.class);
    }
 
    @Override
    public void onMessage(Message msg) {
       try {
+         log.debug("%s got message", AppConsts.EVENT_QUEUE_NAME);
          if (!msg.propertyExists(AppConsts.MESSAGE_TYPE) || !(msg instanceof TextMessage)) {
             throw new IOError(null);
          }
          String type = msg.getStringProperty(AppConsts.MESSAGE_TYPE);
-         if (type.equals(AppConsts.CHANGE_BALANCE_MT)) {
+         if (type.equals(AppConsts.REQUEST_SESSION_MT)) {
+            log.debug("Request session message");
             String text = ((TextMessage) msg).getText();
-            ChangeBalanceDTO dto = null;
+            CallSessionRequestDTO dto = null;
             try {
-               dto = ju.fromXml(text, ChangeBalanceDTO.class);
+               dto = ju.fromXml(text, CallSessionRequestDTO.class);
             } catch (Exception e) {
                log.error("Could not convert xml to object", e);
                throw new IOError(null);
             }
-            if (db.changeBalance(dto.getPhoneNumber(), dto.getDelta()) == null) {
-               throw new IOError(null);
-            }
-
+            ResponseDTO rdto = SessionUtils.requestSession(db, dto);
+            rdto.setRequestid(dto.getRequestid());
+            ms.a(ResponseDTO.ALIAS, ResponseDTO.class);
+            ms.sendObjectMessage(replyQueue, rdto);
          } else {
             throw new IOError(null);
          }
       } catch (IOError e) {
          forwardMessageToNone(msg);
       } catch (JMSException e) {
-         log.trace(e.getMessage(), e);
+         log.logStackTrace(e, "Oops");
       }
    }
 
    private void forwardMessageToNone(Message msg) {
-      log.debug("BalanceMDB: UNKNOWN message. forwarding needed");
+      log.debug("EventMDB: UNKNOWN message. forwarding needed");
       ms.forwardMessage(destination, msg, new MessageModifier() {
 
          @Override
