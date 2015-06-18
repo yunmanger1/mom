@@ -9,8 +9,8 @@
   <mbean code="org.jboss.mail.MailService"
          name="jboss:service=Mail">
     <attribute name="JNDIName">java:/GMailSDU</attribute>
-    <attribute name="User">sdushnikovich@gmail.com</attribute>
-    <attribute name="Password">qwerty123_</attribute>
+    <attribute name="User">email_account@gmail.com</attribute>
+    <attribute name="Password">password</attribute>
     <attribute name="Configuration">
       <!-- A test configuration -->
       <configuration>
@@ -19,13 +19,13 @@
         <property name="mail.transport.protocol" value="smtp"/>
 
         <!-- Change to the user who will receive mail  -->
-        <property name="mail.user" value="sdushnikovich"/>
-	<property name="mail.password" value="qwerty123_" /> 
+        <property name="mail.user" value="email_account"/>
+	<property name="mail.password" value="password" /> 
 
         <!-- Change to the POP3 mail server  -->
         <property name="mail.pop3.host" value="pop.gmail.com"/>
-	<property name="mail.pop3.user" value="sdushnikovich"/>
-	<property name="mail.pop3.password" value="qwerty123_"/>
+	<property name="mail.pop3.user" value="email_account"/>
+	<property name="mail.pop3.password" value="password"/>
 	<property name="mail.pop3.ssl.enable" value="true" />
 	<property name="mail.pop3.starttls.enable" value="true" />
 	<property name="mail.pop3.port" value="587" />
@@ -43,7 +43,7 @@
         <property name="mail.smtp.auth" value="true" />
 
         <!-- Change to the address mail will be from  -->
-        <property name="mail.from" value="sdushnikovich@gmail.com"/>
+        <property name="mail.from" value="email_account@gmail.com"/>
 
         <!-- Enable debugging output from the javamail classes -->
         <property name="mail.debug" value="true"/>
